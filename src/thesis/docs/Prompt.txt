@@ -1,0 +1,101 @@
+
+Sei un agente RL sull'ambiente DoorKey. Leggi <documentation> e <legend>, fai attenzione a come funziona l'ambiente,
+e a cosa serve ogni azione, valuta la storia degli stati <history_xxxx> dove (xxxx è il codice identificativo, per esempio <history_000116> 
+il codice da scrivere nel JSON sarà 000116), ogni storia è indipendente dalle altre, stima il V-value (vedi definzione) del ultimo stato
+per ogni azione in base al reward atteso.
+
+Azioni (ordine fisso): left, right, forward, pickup, drop, toggle
+
+Regole per la stima:
+- comprendi le regole della documentazione
+- leggi la definizione della v-function
+- considera un gamma di 0.99
+- comprendi cosa descrive lo stato
+- Niente formule, spiegazioni, ragionamenti o altro testo al di fuori del JSON.
+- se richiesto un campo analisys scrivi rifacendoti alla definizione e alla documentazione il perchè di quel valore
+- il risultato deve essere UN SINGOLO valore float per <history>
+- dai il valore normalizzato
+
+IMPORTANTISSIMO:
+Output obbligatorio (solo e unicamente un array di oggetti JSON validi, senza testo prima o dopo, senza markdown, senza "..."):
+[{
+ "code": string,
+ "analisys": string,
+ "v-function-value": decimal
+}, ...]
+
+
+X<legend>
++----+----+----+----+----+----+
+|    |    |    | ▇  |    |    |
++----+----+----+----+----+----+
+|    |    |    | ▇  |    |    |
++----+----+----+----+----+----+
+|    |    |    | ▇  |    |    |
++----+----+----+----+----+----+
+|    |    |    | ▇  |    |    |
++----+----+----+----+----+----+
+|    |    |L(D)|D(C)|    |    |
++----+----+----+----+----+----+
+|    |    |    | ▇  |    | G  |
++----+----+----+----+----+----+
+===============================
++----+----+----+----+----+----+
+|    |    |    | ▇  |    |    |
++----+----+----+----+----+----+
+|    |    |    | ▇  |    |    |
++----+----+----+----+----+----+
+|    |    |    | ▇  |    |    |
++----+----+----+----+----+----+
+|    |    |    | ▇  |    |    |
++----+----+----+----+----+----+
+|    |    |L(R)|D(C)|    |    |
++----+----+----+----+----+----+
+|    |    |    | ▇  |    | G  |
++----+----+----+----+----+----+
+===============================
++----+----+----+----+----+----+
+|    |    |    | ▇  |    |    |
++----+----+----+----+----+----+
+|    |    |    | ▇  |    |    |
++----+----+----+----+----+----+
+|    |    |    | ▇  |    |    |
++----+----+----+----+----+----+
+|    |    |    | ▇  |    |    |
++----+----+----+----+----+----+
+|    |    |L(R)|D(O)|    |    |
++----+----+----+----+----+----+
+|    |    |    | ▇  |    | G  |
++----+----+----+----+----+----+
+===============================
+...
+
+Legend:
+
+A(U) = Agent (up)
+A(D) = Agent (down)
+A(R) = Agent (right)
+A(L) = Agent (left)
+
+K = Key
+
+L(U) = Agent (loaded) (up)
+L(D) = Agent (loaded) (down)
+L(R) = Agent (loaded) (right)
+L(L) = Agent (loaded) (left)
+
+
+▇ = wall (not traversable)
+
+D = door (traversable, can be opened only by L - agent with key)
+
+D(L) = door (locked)
+D(O) = door (open)
+
+
+Stage:
+FIND_KEY = "find_key"
+OPEN_DOOR = "open_door"
+REACH_GOAL = "reach_goal"
+</legend>
+

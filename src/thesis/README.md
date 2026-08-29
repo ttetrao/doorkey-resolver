@@ -1,10 +1,10 @@
 # Stima di V* e Q* con LLM in MiniGrid-DoorKey 8x8
 
-Cartella `src/thesis`. Qui ho provato a capire se un LLM riesce a indovinare, senza esempi, quanto vale uno stato (`V*`) o un'azione (`Q*`) in DoorKey partendo solo da qualche mappa ASCII. Poi ho controllato se quei numeri aiutano davvero un agente a imparare più in fretta.
+Cartella `src/thesis`. Qui ho provato a capire se un LLM riesce a indovinare, senza esempi, quanto vale uno stato (`V*`) o un'azione (`Q*`) in DoorKey partendo solo da qualche mappa ASCII. Poi ho controllato se quei numeri aiutano un agente a imparare più in fretta.
 
 ---
 
-## 1. Cosa ho provato, in breve
+## 1. Obiettivo e metodo
 
 | Cosa | A cosa serve | Dove finisce |
 |---|---|---|
@@ -20,7 +20,7 @@ Il gioco è `MiniGrid-DoorKey-8x8-v0`. Il valore vero viene sempre da Value Iter
 
 ---
 
-## 2. Come leggere i numeri
+## 2. Metriche
 
 Ogni riga dei CSV in `result/8x8 final/` è uno stato, o una coppia stato-azione, con il valore vero e quello dato dall'LLM.
 
@@ -37,7 +37,7 @@ Ogni riga dei CSV in `result/8x8 final/` è uno stato, o una coppia stato-azione
 
 ---
 
-## 3. Come sono fatti i CSV
+## 3. Dati
 
 ### 3.1 `files/metadata.csv` — il punto di partenza
 
@@ -51,7 +51,7 @@ id,seed,type,x,y,agent_dir,path,file,step_start,step_end,event,n_maps,v_value,v_
 
 `x,y,agent_dir` dicono dove sta l’agente. `type` dice che pezzo di traiettoria è (`initial`, `worst`, `intermediate`, `transition`, `off_track`). `event` dice a che punto del compito siamo (`find_key`, `open_door`, `reach_goal`). `n_maps` è quante mappe vede l’LLM (1, 3 o 5). `v_llm` parte da 0 e poi viene riempito.
 
-### 3.2 `result/8x8 final/V/h{1,3,5}/*.csv` — i risultati per V
+### 3.2 `result/8x8 final/V/h{1,3,5}/*.csv` — risultati per V
 
 ```
 id,seed,type,path,file,step_start,step_end,event,n_maps,v_value,v_llm
@@ -81,7 +81,7 @@ Stessa tabella, ma `q_llm` qui è `V(s')`, cioè quanto vale lo stato in cui fin
 
 ---
 
-## 4. Prompt e cosa rispondono davvero i modelli
+## 4. Prompt e risposte
 
 ### 4.1 La mappa che vede l’LLM
 
@@ -114,7 +114,13 @@ Sotto c’è sempre: `A` = agente, `L` = con chiave, `▇` = muro, `D(L/O)` = po
 Chiede di valutare la storia `<history_xxxx>` e di dare un solo numero `v-function-value` per ogni codice, con un campo `analisys` che spiega il ragionamento. L’output deve essere solo JSON, niente altro:
 
 ```json
-[{"code": "000116", "analisys": "...", "v-function-value": 0.87}]
+[
+  {
+    "code": "000116",
+    "analisys": "...",
+    "v-function-value": 0.87
+  }
+]
 ```
 
 Prima delle mappe c’è la documentazione del gioco e la definizione di V.
@@ -124,9 +130,20 @@ Prima delle mappe c’è la documentazione del gioco e la definizione di V.
 Stessa idea, ma per ogni stato chiede 5 numeri insieme:
 
 ```json
-[{"code": "000116", "analisys": "...", "q-function-values": {
-  "left": 0.12, "right": 0.15, "forward": 0.89, "pickup": 0.02, "drop": 0.01, "toggle": 0.01
-}}]
+[
+  {
+    "code": "000116",
+    "analisys": "...",
+    "q-function-values": {
+      "left": 0.12,
+      "right": 0.15,
+      "forward": 0.89,
+      "pickup": 0.02,
+      "drop": 0.01,
+      "toggle": 0.01
+    }
+  }
+]
 ```
 
 ### 4.4 Prompt Q v2 — `docs/en/Prompt-q2-en.txt`
@@ -134,51 +151,50 @@ Stessa idea, ma per ogni stato chiede 5 numeri insieme:
 Qui dentro `<history_xxxx>` c’è anche `<action>forward</action>`. L’LLM deve immaginare dove finisce dopo quell’azione e dare il V di quello stato:
 
 ```json
-[{"code": "000116", "action": "forward", "analisys": "...", "v_function_value": 0.92}]
+[
+  {
+    "code": "000116",
+    "action": "forward",
+    "analisys": "...",
+    "v_function_value": 0.92
+  }
+]
 ```
 
-### 4.5 Le risposte vere, non inventate
+### 4.5 Due risposte vere, come esempio
 
-I CSV salvano solo il numero, la parte `analisys` andava persa. Per far vedere il formato vero ho rifatto ora le stesse richieste, con stesso prompt e stessa temperatura, e ho salvato tutto in `result/real_json_examples/`. Gemma impiega circa 3 minuti a rispondere, gpt-oss pochi secondi. I numeri sono nuovi ma vicini a quelli dei CSV.
+I CSV salvano solo il numero, la parte `analisys` andava persa. Qui sotto due chiamate reali rifatte ora con stesso prompt e stessa temperatura, salvate in `result/real_json_examples/`. Gemma impiega circa 3 minuti, gpt-oss pochi secondi. I numeri sono nuovi ma vicini a quelli dei CSV.
 
-**V, gemma-4-26b, stato 000030 (h3, V vero 0.99) — 125s:**
+**V, gemma-4-26b, stato 000030 — V vero 0.99, stima 0.99 (CSV storico 0.9801):**
 
 ```json
-[{"code": "000030", "analisys": "L'agente ha già raccolto la chiave (L) e la porta è aperta (D(O)). L'obiettivo (G) si trova nella cella immediatamente sotto l'agente (posizione 5,5 rispetto alla 4,5). Poiché l'agente è rivolto a destra (R), l'azione ottimale è 'left' per ruotare verso il basso, seguita da 'forward' per raggiungere il traguardo. Seguendo la definizione di v-function, il ritorno atteso è $G_t = \\gamma^1 \\cdot R_{t+2}$ (poiché il reward viene erogato solo al raggiungimento del goal al secondo passo), che con $\\gamma=0.99$ e reward massimo $1.0$ è pari a $0.99$.", "v-function-value": 0.99}]
+[
+  {
+    "code": "000030",
+    "analisys": "L'agente ha già raccolto la chiave (L) e la porta è aperta (D(O)). L'obiettivo (G) si trova nella cella immediatamente sotto l'agente (posizione 5,5 rispetto alla 4,5). Poiché l'agente è rivolto a destra (R), l'azione ottimale è 'left' per ruotare verso il basso, seguita da 'forward' per raggiungere il traguardo. Seguendo la definizione di v-function, il ritorno atteso è $G_t = \\gamma^1 \\cdot R_{t+2}$ (poiché il reward viene erogato solo al raggiungimento del goal al secondo passo), che con $\\gamma=0.99$ e reward massimo $1.0$ è pari a $0.99$.",
+    "v-function-value": 0.99
+  }
+]
 ```
-Nel CSV lo stesso stato aveva `v_llm` 0.9801. File: `result/real_json_examples/gemma_V_000030.json`.
 
-**V, gpt-oss-120b, stesso stato 000030 — 2.3s:**
+**Q v2, gpt-oss-120b, stato 000044 (`forward` contro muro) — singolo V(s'):**
 
 ```json
-[{"code": "000030", "analisys": "Lo stato finale mostra l'agente carico (L) a destra della porta già aperta, di fronte al goal G. L'agente può girare a destra (azione \"right\") e poi avanzare (azione \"forward\") per raggiungere il goal in due passi. Il reward per il raggiungimento del goal è quasi 1 (1 - 0.9·(step_count/max_steps)) e, con gamma=0.99, il valore atteso è ≈0.99·1 ≈ 0.99. Normalizzato nel range [0,1] il v‑function value è quindi circa 0.98.", "v-function-value": 0.98}]
+[
+  {
+    "code": "000044",
+    "action": "forward",
+    "analisys": "The forward action hits a wall, so the agent remains in the same state (position, orientation, and inventory unchanged). From this state the optimal policy must still navigate to the key, open the door, and reach the goal. Estimating the remaining optimal path length at roughly 12 steps and using γ=0.99 gives a discounted factor of about 0.99^12 ≈ 0.886. Assuming the eventual reward at the goal is close to 1, the expected return (state‑value) is approximately 0.88, which is the normalized V‑value for the resulting state.",
+    "v_function_value": 0.88
+  }
+]
 ```
-File: `groq_V_000030.json`.
 
-**Q v1, gemma-4-26b, stato 000030 — 157s, 5 valori insieme:**
-
-```json
-[{"code": "000030", "analisys": "L'agente si trova nello stato L(R) alla posizione (4, 5), avendo già raccolto la chiave. Il goal G è situato in (5, 5), direttamente sotto l'agente. L'azione 'right' è quella che massimizza il ritorno atteso $G_t$ secondo la definizione di $q$-function, poiché permette di orientarsi verso il basso (Down) per raggiungere il goal in soli due step ('right' seguito da 'forward'). L'azione 'left' ha un valore inferiore poiché richiede più rotazioni per l'orientamento, aumentando il numero di step $k$ e riducendo il valore scontato $\\gamma^k R$. Le azioni 'forward', 'pickup', 'drop' e 'toggle' sono inefficienti o inutili: 'forward' allontana l'agente dal goal, 'pickup' è superflua poiché la chiave è già presente, 'drop' perderebbe la chiave e 'toggle' agirebbe su una porta già aperta D(O).", "q-function-values": {"left": 0.492, "right": 0.503, "forward": 0.005, "pickup": 0.0, "drop": 0.0, "toggle": 0.0}}]
-```
-File: `gemma_Qv1_000030.json`.
-
-**Q v1, gpt-oss-120b, stesso stato 000030 — 2.7s:**
-
-```json
-[{"code": "000030", "analisys": "Lo stato finale mostra l'agente caricato (L) in posizione (riga 5, colonna 6) con orientamento verso destra. La porta è già aperta (D(O)) e la casella goal (G) è subito sotto l'agente, ma l'azione forward muove nella direzione corrente (destra) ed è quindi inefficace. L'azione più vantaggiosa è girare a destra (right) per puntare verso il basso e poi avanzare (forward) per raggiungere il goal in un passo. Le altre azioni non avvicinano l'agente al goal: left lo fa girare verso l'alto, pickup è inutile perché l'agente ha già la chiave, drop è inutilizzato e toggle non ha effetto sulla porta aperta. Pertanto i valori Q sono assegnati in modo proporzionale all'utilità attesa, normalizzati fra 0 e 1.", "q-function-values": {"left": 0.1, "right": 0.9, "forward": 0.3, "pickup": 0.0, "drop": 0.0, "toggle": 0.2}}]
-```
-File: `groq_Qv1_000030.json`.
-
-**Q v2, gpt-oss-120b, stato 000044 (`forward` contro muro) — 10s, singolo V(s'):**
-
-```json
-[{"code": "000044", "action": "forward", "analisys": "The forward action hits a wall, so the agent remains in the same state (position, orientation, and inventory unchanged). From this state the optimal policy must still navigate to the key, open the door, and reach the goal. Estimating the remaining optimal path length at roughly 12 steps and using γ=0.99 gives a discounted factor of about 0.99^12 ≈ 0.886. Assuming the eventual reward at the goal is close to 1, the expected return (state‑value) is approximately 0.88, which is the normalized V‑value for the resulting state.", "v_function_value": 0.88}]
-```
-File: `groq_Qv2_000044.json`.
+File completi in `result/real_json_examples/gemma_V_000030.json` e `groq_Qv2_000044.json`.
 
 ---
 
-## 5. Come ho interrogato i modelli
+## 5. Modelli a confronto
 
 Ho tenuto solo due modelli: `gemma-4-26b` e `gpt-oss-120b`.
 
@@ -199,9 +215,9 @@ Ho tenuto solo due modelli: `gemma-4-26b` e `gpt-oss-120b`.
 
 ---
 
-## 6. Risultati per V
+## 6. Risultati — valore V*
 
-Tutti i numeri vengono da `result/evaluate.py` su `result/8x8 final`, filtrato sui due modelli.
+Tutti i numeri vengono da `result/evaluate.py` su `result/8x8 final`, qui riassunti solo per gemma-4-26b e gpt-oss-120b. I grafici mostrano invece tutti i modelli presenti in `8x8 final` per contesto.
 
 | Modello | n | failure | MAE [IC95%] | RMSE | Pearson r [IC95%] | CCC [IC95%] | bias | slope | entro 0.05 |
 |---|---|---|---|---|---|---|---:|---:|---:|
@@ -214,7 +230,7 @@ Tutti i numeri vengono da `result/evaluate.py` su `result/8x8 final`, filtrato s
 | h3, gpt-oss-120b | 123 | 1.6% | 0.0559 [0.0485,0.0634] | 0.0739 | 0.676 [0.579,0.767] | 0.558 [0.479,0.633] | −0.0265 | 1.145 | 54.5% |
 | h3, gpt-oss-120b senza analisys | 203 | 9.4% | 0.0461 [0.0353,0.0596] | 0.0864 | 0.537 [0.442,0.653] | 0.443 [0.337,0.593] | −0.0189 | 0.972 | 74.4% |
 
-### Grafici V — tutti da `result/8x8 final`
+### Grafici V — generati da `result/8x8 final`
 
 **1. Quanto sbaglia in media:**
 
@@ -226,7 +242,7 @@ Barra blu = MAE, arancione = RMSE. Segmento nero = IC 95%. Gemma h3/h5 sta quasi
 
 ![Pearson r e CCC](result/8x8%20final/grafici/confronto_01_correlazioni.png)
 
-Verde = Pearson, viola = CCC. Più alta la barra, meglio l’accordo. Gemma h3 tocca 0.915 di CCC, gpt-oss resta tra 0.45 e 0.67. Togliere `analisys` taglia quasi metà del CCC.
+Verde = Pearson, viola = CCC. Più alta la barra, meglio l’accordo. Gemma h3 tocca 0.915 di CCC, gpt-oss resta tra 0.45 e 0.67.
 
 **3. Vero contro stima, un pannello per modello:**
 
@@ -254,7 +270,7 @@ Righe = tipo di storia, colonne = modello, numero = MAE e `n`. Giallo chiaro = p
 
 ---
 
-## 7. Risultati per Q (h3)
+## 7. Risultati — valore Q* e scelta dell’azione (h3)
 
 ### 7.1 Sul valore
 
@@ -276,19 +292,19 @@ Righe = tipo di storia, colonne = modello, numero = MAE e `n`. Giallo chiaro = p
 
 A caso sarebbe 20%.
 
-### Grafici Q — tutti da `result/8x8 final`
+### Grafici Q — generati da `result/8x8 final`
 
 **1. Errore sul valore:**
 
 ![MAE Q](result/8x8%20final/grafici/confronto_00_errori_valore.png)
 
-v1 sta tra 0.32 e 0.48, v2 scende a 0.11–0.15. Già meglio, ma resta più alto di V.
+v1 sta tra 0.32 e 0.48, v2 scende a 0.11–0.15.
 
 **2. Risposte mancate:**
 
 ![Failure Q](result/8x8%20final/grafici/confronto_05_failure_rate_valore.png)
 
-v1 perde circa un terzo dei JSON (il vettore a 5 valori si rompe spesso), v2 quasi mai.
+v1 perde circa un terzo dei JSON, v2 quasi mai.
 
 **3. Quante volte azzecca l’azione giusta:**
 
@@ -312,11 +328,11 @@ Righe = azione davvero migliore, colonne = azione scelta dall’LLM. Diagonale =
 
 ![Accuracy per azione](result/8x8%20final/grafici/confronto_13_per_action_accuracy.png)
 
-v1 crolla su `pickup` per gemma (28.6%) e su `left` per gpt-oss. Con v2 tutto sale sopra 74%, `pickup` di gpt-oss arriva a 100%.
+v1 crolla su `pickup` per gemma (28.6%) e su `left` per gpt-oss. Con v2 tutto sale sopra 74%.
 
 ---
 
-## 8. Cosa portarsi all’incontro
+## 8. Note conclusive
 
 * Gemma indovina V anche con una sola mappa e non sbaglia mai la risposta. gpt-oss va bene solo con poco contesto e a volte non risponde. Chiedere la spiegazione (`analisys`) aiuta entrambi.
 * Per Q, chiedere direttamente `Q(s,a)` non rende. Chiedere `V(s')` dopo l’azione, invece, porta Top-1 a 80–90% e Top-2 quasi a 100%.
@@ -324,7 +340,7 @@ v1 crolla su `pickup` per gemma (28.6%) e su `left` per gpt-oss. Con v2 tutto sa
 
 ---
 
-## 9. Struttura della cartella
+## 9. Contenuto della cartella
 
 ```
 thesis/
@@ -350,4 +366,4 @@ thesis/
 └── env/                       # wrapper di MiniGrid
 ```
 
-Tutti i numeri di §6–7 vengono dai `log_valutazione.txt` creati da `result/evaluate.py` e `evaluate_q.py` su `result/8x8 final` filtrato a gemma-4-26b e gpt-oss-120b.
+Tutti i numeri di §6–7 vengono dai `log_valutazione.txt` creati da `result/evaluate.py` e `evaluate_q.py` su `result/8x8 final`.

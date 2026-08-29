@@ -1,6 +1,6 @@
 # Stima di V* e Q* con LLM in MiniGrid-DoorKey 8x8
 
-Cartella `src/thesis`. Qui ho provato a capire se un LLM riesce a indovinare, senza esempi, quanto vale uno stato (`V*`) o un'azione (`Q*`) in DoorKey partendo solo da qualche mappa ASCII. Poi ho controllato se quei numeri aiutano un agente a imparare più in fretta.
+Cartella `src/thesis`. Contiene i file usati per estrarre gli stati ed eseguire i test per capire se un LLM riesce a indovinare, senza esempi, quanto vale uno stato (`V*`) o un'azione (`Q*`) in DoorKey partendo solo da qualche mappa ASCII.
 
 ---
 
@@ -16,7 +16,7 @@ Cartella `src/thesis`. Qui ho provato a capire se un LLM riesce a indovinare, se
 | `result/evaluate_q.py` | stessa cosa per `q_value` contro `q_llm`, più la scelta dell'azione | stessi grafici, 15 in tutto |
 | `agent/doorkey_state.py` e gli agenti `doorkey_qtable*` / `doorkey_ddqn*` | provano a usare le stime LLM per dare una spinta all'addestramento | — |
 
-Il gioco è `MiniGrid-DoorKey-8x8-v0`. Il valore vero viene sempre da Value Iteration, non da prove a caso.
+L'ambiente utilizzato è `MiniGrid-DoorKey-8x8-v0`.
 
 ---
 
@@ -49,7 +49,17 @@ id,seed,type,x,y,agent_dir,path,file,step_start,step_end,event,n_maps,v_value,v_
 000003,102,transition,2,4,1,102/transition_step_0005_0007_find_key.txt,transition_step_0005_0007_find_key.txt,5,7,find_key,3,0.8687,0
 ```
 
-`x,y,agent_dir` dicono dove sta l’agente. `type` dice che pezzo di traiettoria è (`initial`, `worst`, `intermediate`, `transition`, `off_track`). `event` dice a che punto del compito siamo (`find_key`, `open_door`, `reach_goal`). `n_maps` è quante mappe vede l’LLM (1, 3 o 5). `v_llm` parte da 0 e poi viene riempito.
+`x,y,agent_dir` indicano la posizione e la direzione dell'agente. `type` mostra il tipo di traiettoria è (`initial`, `worst`, `intermediate`, `transition`, `off_track`). `event` mostra a che punto del task siamo (`find_key`, `open_door`, `reach_goal`). `n_maps` è quante mappe vede l’LLM (1, 3 o 5). `v_llm` parte da 0 e poi viene riempito.
+
+* **Tipi di traiettoria (`type`):**
+  * `initial` — stato iniziale, step 0, 1 mappa, baseline
+  * `transition` — finestra di 3 mappe che finisce sull'azione che cambia fase (`find_key` → `open_door` → `reach_goal`)
+  * `intermediate` — 3 mappe prese 3 passi prima della transizione, stesso evento ma meno indizi
+  * `worst` — stato con `V*` più basso lungo il percorso ottimo (1 mappa, punto più svantaggiato)
+  * `off_track` — 3 stati fuori traiettoria, uno per fase, con 3 mosse casuali (1 mappa per `initial`/`worst`, 3 per gli altri in `h3`)
+
+#### Come è stato calcolato `v_value` (verità di riferimento).
+`v_value` non è stimato, è il valore ottimo `V*` del MDP DoorKey. Lo spazio degli stati è `(x,y, direzione, has_key, door_open)`, transizioni deterministiche ricavate da muri/porta/chiave/goal, reward 1 solo sul goal. Calcolato con Value Iteration con `γ=0.99` e soglia `θ=1e-6` fino a convergenza. `V*` così ottenuto è `v_value` normalizzato in [0,1]; per `Q*` vale `Q*(s,a)=r+γ·V*(s')` (`scripts/q_export.py`). È la verità con cui poi confronto `v_llm`/`q_llm`.
 
 ### 3.2 `result/8x8 final/V/h{1,3,5}/*.csv` — risultati per V
 
@@ -58,7 +68,7 @@ id,seed,type,path,file,step_start,step_end,event,n_maps,v_value,v_llm
 000030,860,intermediate,860/intermediate_step_0022_0024_reach_goal.txt,intermediate_step_0022_0024_reach_goal.txt,22,24,reach_goal,3,0.99,0.9801
 ```
 
-Stesse colonne di prima, senza `x,y`. `v_llm==0` vuol dire risposta mancata. La cartella `h1/h3/h5` dice quante mappe c’erano nel prompt.
+Utilizza le stesse colonne di prima, senza `x,y`. In questo caso `v_llm==0` indica una mancata generazione del valore. La cartella `h1/h3/h5` separa in base a quante mappe venivano fornite all'agente.
 
 ### 3.3 `result/8x8 final/Q/h3/v1_*.csv` — Q diretto (v1)
 
@@ -68,7 +78,7 @@ id,seed,type,path,file,step_start,step_end,event,n_maps,action,q_value,q_llm
 000139,860,transition,860/transition_step_0019_0021_open_door.txt,transition_step_0019_0021_open_door.txt,19,21,open_door,3,forward,0.95099,0.02
 ```
 
-Stesso `id` ripetuto 5 volte, una per azione. `q_llm` diverso per ogni azione.
+Lo stesso `id` viene  ripetuto 5 volte, una per azione, e viene generato un `q_llm` diverso per ogni azione.
 
 ### 3.4 `result/8x8 final/Q/h3/v2_*.csv` — V dello stato dopo l’azione (v2)
 
@@ -77,7 +87,7 @@ id,seed,type,path,file,step_start,step_end,event,n_maps,action,q_value,q_llm
 001497,413,intermediate,413/intermediate_step_0019_0021_reach_goal.txt,intermediate_step_0019_0021_reach_goal.txt,19,21,reach_goal,3,right,0.970299,0.97
 ```
 
-Stessa tabella, ma `q_llm` qui è `V(s')`, cioè quanto vale lo stato in cui finisci dopo aver fatto quell’azione.
+Si utilizza la stessa tabella, ma `q_llm` qui è `V(s')`, cioè quanto vale lo stato in cui finisci dopo aver fatto quell’azione.
 
 ---
 
@@ -105,6 +115,8 @@ Ogni file in `files/<seed>/*.txt` ha 1–5 mappe così, più la legenda. Esempio
 |    |    | ▇  |    |    |    |
 |    |    | ▇  |    |    |L(U)|
 |    |    | ▇  |    |    | G  |
++----+----+----+----+----+----+
+================================================
 ```
 
 Sotto c’è sempre: `A` = agente, `L` = con chiave, `▇` = muro, `D(L/O)` = porta, `G` = goal.
@@ -214,7 +226,7 @@ File completi in `result/real_json_examples/gemma_V_000030.json` e `groq_Qv2_000
 
 ## 5. Modelli a confronto
 
-Ho tenuto solo due modelli: `gemma-4-26b` e `gpt-oss-120b`.
+I modelli piu prestanti sono stati: `gemma-4-26b` e `gpt-oss-120b`.
 
 * **Contesto `h` per V:** `h1` = 1 mappa, `h3` = 3 mappe, `h5` = 5 mappe.
 * **Q (h3):** `v1` contro `v2` — vedi riquadro qui sotto.

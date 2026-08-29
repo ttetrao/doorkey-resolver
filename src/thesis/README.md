@@ -59,7 +59,7 @@ id,seed,type,x,y,agent_dir,path,file,step_start,step_end,event,n_maps,v_value,v_
   * `off_track` — 3 stati fuori traiettoria, uno per fase, con 3 mosse casuali (1 mappa per `initial`/`worst`, 3 per gli altri in `h3`)
 
 #### Come è stato calcolato `v_value` (verità di riferimento).
-`v_value` non è stimato, è il valore ottimo `V*` del MDP DoorKey. Lo spazio degli stati è `(x,y, direzione, has_key, door_open)`, transizioni deterministiche ricavate da muri/porta/chiave/goal, reward 1 solo sul goal. Calcolato con Value Iteration con `γ=0.99` e soglia `θ=1e-6` fino a convergenza. `V*` così ottenuto è `v_value` normalizzato in [0,1]; per `Q*` vale `Q*(s,a)=r+γ·V*(s')` (`scripts/q_export.py`). È la verità con cui poi confronto `v_llm`/`q_llm`.
+`v_value` non è stimato, è il valore ottimo `V*` del MDP DoorKey. Lo spazio degli stati è `(x,y, direzione, has_key, door_open)`, transizioni deterministiche ricavate da muri/porta/chiave/goal, reward 1 solo sul goal. Calcolato con Value Iteration con `γ=0.99`. `V*` così ottenuto è `v_value` normalizzato in [0,1]; per `Q*` vale `Q*(s,a)=r+γ·V*(s')` (`scripts/q_export.py`). È la verità con cui poi confronto `v_llm`/`q_llm`.
 
 ### 3.2 `result/8x8 final/V/h{1,3,5}/*.csv` — risultati per V
 

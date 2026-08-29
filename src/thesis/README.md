@@ -171,7 +171,16 @@ I CSV salvano solo il numero, la parte `analisys` andava persa. Qui sotto due ch
 [
   {
     "code": "000030",
-    "analisys": "L'agente ha già raccolto la chiave (L) e la porta è aperta (D(O)). L'obiettivo (G) si trova nella cella immediatamente sotto l'agente (posizione 5,5 rispetto alla 4,5). Poiché l'agente è rivolto a destra (R), l'azione ottimale è 'left' per ruotare verso il basso, seguita da 'forward' per raggiungere il traguardo. Seguendo la definizione di v-function, il ritorno atteso è $G_t = \\gamma^1 \\cdot R_{t+2}$ (poiché il reward viene erogato solo al raggiungimento del goal al secondo passo), che con $\\gamma=0.99$ e reward massimo $1.0$ è pari a $0.99$.",
+    "analisys": "L'agente ha già raccolto la chiave (L) e la porta "
+                "è aperta (D(O)). L'obiettivo (G) si trova nella cella "
+                "immediatamente sotto l'agente (posizione 5,5 rispetto "
+                "alla 4,5). Poiché l'agente è rivolto a destra (R), "
+                "l'azione ottimale è 'left' per ruotare verso il basso, "
+                "seguita da 'forward' per raggiungere il traguardo. "
+                "Seguendo la definizione di v-function, il ritorno atteso "
+                "è $G_t = \\gamma^1 \\cdot R_{t+2}$ (poiché il reward viene "
+                "erogato solo al raggiungimento del goal al secondo passo), "
+                "che con $\\gamma=0.99$ e reward massimo $1.0$ è pari a $0.99$.",
     "v-function-value": 0.99
   }
 ]
@@ -184,7 +193,16 @@ I CSV salvano solo il numero, la parte `analisys` andava persa. Qui sotto due ch
   {
     "code": "000044",
     "action": "forward",
-    "analisys": "The forward action hits a wall, so the agent remains in the same state (position, orientation, and inventory unchanged). From this state the optimal policy must still navigate to the key, open the door, and reach the goal. Estimating the remaining optimal path length at roughly 12 steps and using γ=0.99 gives a discounted factor of about 0.99^12 ≈ 0.886. Assuming the eventual reward at the goal is close to 1, the expected return (state‑value) is approximately 0.88, which is the normalized V‑value for the resulting state.",
+    "analisys": "The forward action hits a wall, so the agent remains "
+                "in the same state (position, orientation, and inventory "
+                "unchanged). From this state the optimal policy must still "
+                "navigate to the key, open the door, and reach the goal. "
+                "Estimating the remaining optimal path length at roughly "
+                "12 steps and using γ=0.99 gives a discounted factor of "
+                "about 0.99^12 ≈ 0.886. Assuming the eventual reward at the "
+                "goal is close to 1, the expected return (state‑value) is "
+                "approximately 0.88, which is the normalized V‑value for "
+                "the resulting state.",
     "v_function_value": 0.88
   }
 ]
@@ -354,8 +372,9 @@ thesis/
 ├── docs/en/                   # varianti in inglese e definizioni
 ├── files/metadata.csv         # valori veri (30 semi)
 ├── files/<seed>/*.txt         # le mappe ASCII
-├── result/8x8 final/V/h{1,3,5}/  # CSV con le stime LLM
-├── result/8x8 final/Q/h3/        # CSV Q v1/v2
+├── result/8x8 final/V/h{1,3,5}/  # CSV con le stime LLM (tutti i modelli)
+├── result/8x8 final/Q/h3/        # CSV Q v1/v2 (tutti i modelli)
+├── result/csv_filtrati_gemma-gptoss/ # copia solo gemma-4-26b + gpt-oss-120b (8 V + 4 Q)
 ├── result/evaluate.py         # fa i conti per V
 ├── result/evaluate_q.py       # fa i conti per Q
 ├── result/8x8 final/grafici/  # grafici di questa sintesi (12 immagini)
@@ -367,3 +386,5 @@ thesis/
 ```
 
 Tutti i numeri di §6–7 vengono dai `log_valutazione.txt` creati da `result/evaluate.py` e `evaluate_q.py` su `result/8x8 final`.
+
+> **CSV:** gli originali con tutti i modelli restano in `result/8x8 final/`. Una copia con solo `gemma-4-26b` e `gpt-oss-120b` (8 file V + 4 file Q) è salvata in `result/csv_filtrati_gemma-gptoss/` per consultazione rapida.

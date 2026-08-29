@@ -274,13 +274,7 @@ Ogni punto è uno stato. Colore = tipo di storia. Linea nera tratteggiata = perf
 
 Verde <1%, arancione <5%, rosso oltre 5%. Gemma 0% sempre. gpt-oss cresce con `h` e senza `analisys` arriva al 9.4%.
 
-**5. Quante stime stanno sotto una soglia:**
-
-![ECDF errori](result/8x8%20final/grafici/confronto_05_ecdf_errori.png)
-
-Asse x = errore, y = quota di stime con errore sotto quel valore. Linee a 0.05 e 0.10. Gemma h3 a 0.05 è già al 98%, gpt-oss h3 solo al 54%.
-
-**6. Dove sbaglia di più:**
+**5. Dove sbaglia di più:**
 
 ![MAE per tipo](result/8x8%20final/grafici/confronto_03_heatmap_tipo.png)
 

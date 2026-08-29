@@ -362,8 +362,8 @@ def plot_scatter(df, metrics, title, path):
         if len(sub):
             ax.scatter(sub["q_value"], sub["q_llm"], s=28, alpha=0.75,
                        label=t, color=color, edgecolor="white", linewidth=0.3)
-    lo = min(df["q_value"].min(), df["q_llm"].min()) - 0.03
-    hi = max(df["q_value"].max(), df["q_llm"].max()) + 0.03
+    # massima leggibilità: assi fissi e identici per tutti i pannelli (Q* in [0,1])
+    lo, hi = -0.05, 1.05
     ax.plot([lo, hi], [lo, hi], "k--", lw=1.3, label="y = x")
     xs = np.linspace(lo, hi, 100)
     ax.fill_between(xs, xs - 0.05, xs + 0.05, color="green", alpha=0.08, label="±0.05")
@@ -817,6 +817,9 @@ def plot_global_comparison(results, out_dir, log_lines):
                              markerfacecolor=c, markersize=8) for t, c in TYPE_COLORS.items()]
     fig.legend(handles=legend_handles, loc='upper center', ncol=len(TYPE_COLORS),
                frameon=True, fontsize=9, bbox_to_anchor=(0.5, 1.0))
+    # assi fissi per tutti i pannelli — massima leggibilità (Q* in [0,1])
+    glo, ghi = -0.05, 1.05
+    xs_glo = np.linspace(glo, ghi, 50)
     for i, r in enumerate(results):
         ax = axes[i // ncols][i % ncols]
         df, m = r["df_val"], r["metrics"]
@@ -824,13 +827,10 @@ def plot_global_comparison(results, out_dir, log_lines):
             sub = df[df["type"] == t]
             if len(sub):
                 ax.scatter(sub["q_value"], sub["q_llm"], s=12, alpha=0.7, color=color)
-        lo = min(df["q_value"].min(), df["q_llm"].min()) - 0.03
-        hi = max(df["q_value"].max(), df["q_llm"].max()) + 0.03
-        xs = np.linspace(lo, hi, 50)
-        ax.plot([lo, hi], [lo, hi], "k--", lw=1)
+        ax.plot([glo, ghi], [glo, ghi], "k--", lw=1)
         if np.isfinite(m["slope"]):
-            ax.plot(xs, m["intercept"] + m["slope"] * xs, color="red", lw=1, alpha=0.8)
-        ax.set_xlim(lo, hi); ax.set_ylim(lo, hi)
+            ax.plot(xs_glo, m["intercept"] + m["slope"] * xs_glo, color="red", lw=1, alpha=0.8)
+        ax.set_xlim(glo, ghi); ax.set_ylim(glo, ghi)
         ax.set_title(f"{r['tag_label']}\nr={m['pearson_r']:.2f} CCC={m['ccc']:.2f} MAE={m['mae']:.3f}", fontsize=9)
         ax.set_xlabel("q_value", fontsize=8); ax.set_ylabel("q_llm", fontsize=8)
     for j in range(n, nrows * ncols):

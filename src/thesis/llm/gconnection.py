@@ -170,6 +170,7 @@ def process_batch(client, base_prompt, base, batch, batch_idx, total):
 
     t0 = time.time()
     response = call_with_retry(client, prompt)
+    print(response)
     elapsed = time.time() - t0
     print(f"[Batch {batch_idx}/{total}] Risposta in {elapsed:.1f}s")
 

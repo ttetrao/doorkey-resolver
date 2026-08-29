@@ -1,0 +1,319 @@
+======================================================================
+LOG DI VALUTAZIONE LLM (q_value vs q_llm + selezione azione)
+Generato il: 2026-08-29 09:14:57
+Sorgente: /tmp/filtered_Q_all
+File CSV analizzati: 4
+======================================================================
+
+NOTE METODOLOGICHE:
+- Si processano SOLO righe con entry_type == 1 (5 righe per stato).
+- Confronto valori: q_value (Q* ottima per l'azione) vs q_llm (stima LLM).
+- Selezione azione: argmax(q_value) = azione ottima, argmax(q_llm) = azione LLM.
+- Accuracy = frazione di stati in cui l'LLM sceglie l'azione ottima.
+- Value loss = q_value[ottima] - q_value[scelta LLM]: perdita reale di reward.
+- Top-K accuracy = l'azione ottima e' nelle prime K posizioni del ranking LLM.
+- Failure rate (valore) = righe entry_type=1 con q_llm == 0 (LLM non ha prodotto stima).
+
+----------------------------------------------------------------------
+FILE: /tmp/filtered_Q_all/h3/v1_gemma-4-26b.csv
+Modello: v1_gemma-4-26b   |   Configurazione: h3   |   Variante: default
+----------------------------------------------------------------------
+Righe totali nel CSV: 1385
+  entry_type=1 (q_value vs q_llm): 1385 righe, di cui 519 failure (q_llm==0)
+  righe valide per metriche (q_llm!=0): 866
+  seed unici: 30
+
+METRICHE VALORE (q_value vs q_llm):
+  MAE  = 0.4867  [IC 95%: 0.4685, 0.5059]
+  RMSE = 0.5914   Errore max = 0.9800
+  Bias = -0.4753  (SOTTOstimare)
+  Pearson r  = 0.1625  [IC 95%: 0.0939, 0.2336]
+  Spearman rho = 0.1316
+  CCC (Lin) = 0.0154  [IC 95%: 0.0088, 0.0224]
+  R^2 regressione = 0.0264
+  Calibrazione: slope=1.2270 (ideale=1), intercept=-0.6811 (ideale=0)
+  Failure rate = 37.5%  (519/1385)
+
+METRICHE SELEZIONE AZIONE (argmax(q_value) vs argmax(q_llm)):
+  Top-1 accuracy (azione ottima): 66.7%  (su 276 stati validi)
+  Top-2 accuracy:                 80.1%
+  Top-3 accuracy:                 89.5%
+  Value loss medio:               0.0039
+  (random baseline = 20% per 5 azioni)
+  Accuracy per tipo traiettoria:
+    intermediate      83.1%  (n=83)
+    worst             69.0%  (n=29)
+    transition        64.7%  (n=85)
+    off_track         50.6%  (n=79)
+  Accuracy per azione ottima:
+    forward      76.4%  (n=89)
+    left         68.3%  (n=82)
+    pickup       28.6%  (n=28)
+    right        63.8%  (n=47)
+    toggle       73.3%  (n=30)
+  Matrice di confusione (riga=ottima, colonna=LLM):
+        left     right   forward    pickup    toggle
+     forward       13         8        68         0         0
+        left       56        18         8         0         0
+      pickup        1         1        18         8         0
+       right       11        30         6         0         0
+      toggle        1         3         4         0        22
+
+Immagini generate per questo file:
+  - h3_v1_gemma-4-26b_1_scatter_valore.png
+  - h3_v1_gemma-4-26b_2_residui_valore.png
+  - h3_v1_gemma-4-26b_3_distribuzione_errori_valore.png
+  - h3_v1_gemma-4-26b_4_mae_per_tipo_valore.png
+  - h3_v1_gemma-4-26b_5_mae_per_evento_valore.png
+  - h3_v1_gemma-4-26b_6_bias_per_tipo_valore.png
+  - h3_v1_gemma-4-26b_7_mae_per_nmaps_valore.png
+  - h3_v1_gemma-4-26b_8_accuracy_azione.png
+  - h3_v1_gemma-4-26b_9_accuracy_per_tipo_azione.png
+  - h3_v1_gemma-4-26b_10_accuracy_per_evento_azione.png
+  - h3_v1_gemma-4-26b_11_confusion_matrix_azione.png
+  - h3_v1_gemma-4-26b_12_rank_distribution_azione.png
+  - h3_v1_gemma-4-26b_13_value_loss_azione.png
+  - h3_v1_gemma-4-26b_14_errore_valore_vs_azione.png
+  - h3_v1_gemma-4-26b_15_per_action_accuracy.png
+
+----------------------------------------------------------------------
+FILE: /tmp/filtered_Q_all/h3/v1_gpt-oss_120b.csv
+Modello: v1_gpt-oss_120b   |   Configurazione: h3   |   Variante: default
+----------------------------------------------------------------------
+Righe totali nel CSV: 745
+  entry_type=1 (q_value vs q_llm): 745 righe, di cui 267 failure (q_llm==0)
+  righe valide per metriche (q_llm!=0): 478
+  seed unici: 30
+
+METRICHE VALORE (q_value vs q_llm):
+  MAE  = 0.3203  [IC 95%: 0.2817, 0.3598]
+  RMSE = 0.4471   Errore max = 0.9106
+  Bias = -0.2840  (SOTTOstimare)
+  Pearson r  = 0.1560  [IC 95%: 0.0387, 0.2599]
+  Spearman rho = 0.1701
+  CCC (Lin) = 0.0254  [IC 95%: 0.0062, 0.0445]
+  R^2 regressione = 0.0243
+  Calibrazione: slope=1.1433 (ideale=1), intercept=-0.4139 (ideale=0)
+  Failure rate = 35.8%  (267/745)
+
+METRICHE SELEZIONE AZIONE (argmax(q_value) vs argmax(q_llm)):
+  Top-1 accuracy (azione ottima): 61.7%  (su 141 stati validi)
+  Top-2 accuracy:                 83.0%
+  Top-3 accuracy:                 92.9%
+  Value loss medio:               0.0047
+  (random baseline = 20% per 5 azioni)
+  Accuracy per tipo traiettoria:
+    transition        76.1%  (n=46)
+    intermediate      65.2%  (n=46)
+    off_track         47.4%  (n=38)
+    worst             36.4%  (n=11)
+  Accuracy per azione ottima:
+    forward      67.4%  (n=43)
+    left         48.9%  (n=45)
+    pickup       68.4%  (n=19)
+    right        71.4%  (n=21)
+    toggle       61.5%  (n=13)
+  Matrice di confusione (riga=ottima, colonna=LLM):
+        left     right   forward    pickup    toggle
+     forward        8         5        29         0         1
+        left       22         8        12         0         3
+      pickup        0         1         5        13         0
+       right        4        15         2         0         0
+      toggle        2         2         1         0         8
+
+Immagini generate per questo file:
+  - h3_v1_gpt-oss_120b_1_scatter_valore.png
+  - h3_v1_gpt-oss_120b_2_residui_valore.png
+  - h3_v1_gpt-oss_120b_3_distribuzione_errori_valore.png
+  - h3_v1_gpt-oss_120b_4_mae_per_tipo_valore.png
+  - h3_v1_gpt-oss_120b_5_mae_per_evento_valore.png
+  - h3_v1_gpt-oss_120b_6_bias_per_tipo_valore.png
+  - h3_v1_gpt-oss_120b_7_mae_per_nmaps_valore.png
+  - h3_v1_gpt-oss_120b_8_accuracy_azione.png
+  - h3_v1_gpt-oss_120b_9_accuracy_per_tipo_azione.png
+  - h3_v1_gpt-oss_120b_10_accuracy_per_evento_azione.png
+  - h3_v1_gpt-oss_120b_11_confusion_matrix_azione.png
+  - h3_v1_gpt-oss_120b_12_rank_distribution_azione.png
+  - h3_v1_gpt-oss_120b_13_value_loss_azione.png
+  - h3_v1_gpt-oss_120b_14_errore_valore_vs_azione.png
+  - h3_v1_gpt-oss_120b_15_per_action_accuracy.png
+
+----------------------------------------------------------------------
+FILE: /tmp/filtered_Q_all/h3/v2_gemma-4-26b.csv
+Modello: v2_gemma-4-26b   |   Configurazione: h3   |   Variante: default
+----------------------------------------------------------------------
+Righe totali nel CSV: 315
+  entry_type=1 (q_value vs q_llm): 315 righe, di cui 1 failure (q_llm==0)
+  righe valide per metriche (q_llm!=0): 314
+  seed unici: 30
+
+METRICHE VALORE (q_value vs q_llm):
+  MAE  = 0.1126  [IC 95%: 0.0951, 0.1349]
+  RMSE = 0.2078   Errore max = 0.7845
+  Bias = -0.0968  (SOTTOstimare)
+  Pearson r  = 0.4517  [IC 95%: 0.4027, 0.4981]
+  Spearman rho = 0.6097
+  CCC (Lin) = 0.1805  [IC 95%: 0.1518, 0.2122]
+  R^2 regressione = 0.2040
+  Calibrazione: slope=1.7426 (ideale=1), intercept=-0.7623 (ideale=0)
+  Failure rate = 0.3%  (1/315)
+
+METRICHE SELEZIONE AZIONE (argmax(q_value) vs argmax(q_llm)):
+  Top-1 accuracy (azione ottima): 81.6%  (su 207 stati validi)
+  Top-2 accuracy:                 95.7%
+  Top-3 accuracy:                 100.0%
+  Value loss medio:               0.0016
+  (random baseline = 20% per 5 azioni)
+  Accuracy per tipo traiettoria:
+    intermediate      87.9%  (n=66)
+    transition        84.7%  (n=59)
+    worst             76.0%  (n=25)
+    off_track         73.7%  (n=57)
+  Accuracy per azione ottima:
+    forward      74.3%  (n=35)
+    left         83.3%  (n=36)
+    pickup       78.4%  (n=51)
+    right        87.2%  (n=39)
+    toggle       84.8%  (n=46)
+  Matrice di confusione (riga=ottima, colonna=LLM):
+        left     right   forward    pickup    toggle
+     forward        4         2        26         2         1
+        left       30         1         0         3         2
+      pickup        2         3         3        40         3
+       right        1        34         2         1         1
+      toggle        0         2         2         3        39
+
+Immagini generate per questo file:
+  - h3_v2_gemma-4-26b_1_scatter_valore.png
+  - h3_v2_gemma-4-26b_2_residui_valore.png
+  - h3_v2_gemma-4-26b_3_distribuzione_errori_valore.png
+  - h3_v2_gemma-4-26b_4_mae_per_tipo_valore.png
+  - h3_v2_gemma-4-26b_5_mae_per_evento_valore.png
+  - h3_v2_gemma-4-26b_6_bias_per_tipo_valore.png
+  - h3_v2_gemma-4-26b_7_mae_per_nmaps_valore.png
+  - h3_v2_gemma-4-26b_8_accuracy_azione.png
+  - h3_v2_gemma-4-26b_9_accuracy_per_tipo_azione.png
+  - h3_v2_gemma-4-26b_10_accuracy_per_evento_azione.png
+  - h3_v2_gemma-4-26b_11_confusion_matrix_azione.png
+  - h3_v2_gemma-4-26b_12_rank_distribution_azione.png
+  - h3_v2_gemma-4-26b_13_value_loss_azione.png
+  - h3_v2_gemma-4-26b_14_errore_valore_vs_azione.png
+  - h3_v2_gemma-4-26b_15_per_action_accuracy.png
+
+----------------------------------------------------------------------
+FILE: /tmp/filtered_Q_all/h3/v2_gpt-oss_120b.csv
+Modello: v2_gpt-oss_120b   |   Configurazione: h3   |   Variante: default
+----------------------------------------------------------------------
+Righe totali nel CSV: 150
+  entry_type=1 (q_value vs q_llm): 150 righe, di cui 5 failure (q_llm==0)
+  righe valide per metriche (q_llm!=0): 145
+  seed unici: 30
+
+METRICHE VALORE (q_value vs q_llm):
+  MAE  = 0.1548  [IC 95%: 0.1108, 0.2077]
+  RMSE = 0.2865   Errore max = 0.8827
+  Bias = -0.1464  (SOTTOstimare)
+  Pearson r  = 0.3320  [IC 95%: 0.1700, 0.4584]
+  Spearman rho = 0.5364
+  CCC (Lin) = 0.0926  [IC 95%: 0.0433, 0.1364]
+  R^2 regressione = 0.1102
+  Calibrazione: slope=1.7569 (ideale=1), intercept=-0.8259 (ideale=0)
+  Failure rate = 3.3%  (5/150)
+
+METRICHE SELEZIONE AZIONE (argmax(q_value) vs argmax(q_llm)):
+  Top-1 accuracy (azione ottima): 90.1%  (su 111 stati validi)
+  Top-2 accuracy:                 99.1%
+  Top-3 accuracy:                 100.0%
+  Value loss medio:               0.0008
+  (random baseline = 20% per 5 azioni)
+  Accuracy per tipo traiettoria:
+    off_track         97.0%  (n=33)
+    worst             90.9%  (n=11)
+    transition        89.2%  (n=37)
+    intermediate      83.3%  (n=30)
+  Accuracy per azione ottima:
+    forward      85.7%  (n=21)
+    left         90.9%  (n=22)
+    pickup      100.0%  (n=30)
+    right        80.0%  (n=25)
+    toggle       92.3%  (n=13)
+  Matrice di confusione (riga=ottima, colonna=LLM):
+        left     right   forward    pickup    toggle
+     forward        1         0        18         1         1
+        left       20         1         0         0         1
+      pickup        0         0         0        30         0
+       right        1        20         1         2         1
+      toggle        0         1         0         0        12
+
+Immagini generate per questo file:
+  - h3_v2_gpt-oss_120b_1_scatter_valore.png
+  - h3_v2_gpt-oss_120b_2_residui_valore.png
+  - h3_v2_gpt-oss_120b_3_distribuzione_errori_valore.png
+  - h3_v2_gpt-oss_120b_4_mae_per_tipo_valore.png
+  - h3_v2_gpt-oss_120b_5_mae_per_evento_valore.png
+  - h3_v2_gpt-oss_120b_6_bias_per_tipo_valore.png
+  - h3_v2_gpt-oss_120b_7_mae_per_nmaps_valore.png
+  - h3_v2_gpt-oss_120b_8_accuracy_azione.png
+  - h3_v2_gpt-oss_120b_9_accuracy_per_tipo_azione.png
+  - h3_v2_gpt-oss_120b_10_accuracy_per_evento_azione.png
+  - h3_v2_gpt-oss_120b_11_confusion_matrix_azione.png
+  - h3_v2_gpt-oss_120b_12_rank_distribution_azione.png
+  - h3_v2_gpt-oss_120b_13_value_loss_azione.png
+  - h3_v2_gpt-oss_120b_14_errore_valore_vs_azione.png
+  - h3_v2_gpt-oss_120b_15_per_action_accuracy.png
+
+======================================================================
+CONFRONTO GLOBALE TRA MODELLI / CONFIGURAZIONI
+======================================================================
+
+--- METRICHE VALORE (entry_type=1, q_value vs q_llm) ---
+modello/config                                 n  fail%      MAE     RMSE      Pearson r [IC95%]            CCC [IC95%]  slope     bias
+h3 · v1_gemma-4-26b                          866  37.5%   0.4867   0.5914    0.162 [0.094,0.234]    0.015 [0.009,0.022]  1.227  -0.4753
+h3 · v1_gpt-oss_120b                         478  35.8%   0.3203   0.4471    0.156 [0.039,0.260]    0.025 [0.006,0.044]  1.143  -0.2840
+h3 · v2_gemma-4-26b                          314   0.3%   0.1126   0.2078    0.452 [0.403,0.498]    0.180 [0.152,0.212]  1.743  -0.0968
+h3 · v2_gpt-oss_120b                         145   3.3%   0.1548   0.2865    0.332 [0.170,0.458]    0.093 [0.043,0.136]  1.757  -0.1464
+
+--- METRICHE SELEZIONE AZIONE (argmax(q_value) vs argmax(q_llm)) ---
+modello/config                              stati  fail  valid   Top-1%   Top-2%   Top-3%    VLoss
+h3 · v1_gemma-4-26b                           277     1    276    66.7%    80.1%    89.5%   0.0039
+h3 · v1_gpt-oss_120b                          149     8    141    61.7%    83.0%    92.9%   0.0047
+h3 · v2_gemma-4-26b                           208     1    207    81.6%    95.7%   100.0%   0.0016
+h3 · v2_gpt-oss_120b                          114     3    111    90.1%    99.1%   100.0%   0.0008
+
+Accuracy selezione azione per tipo traiettoria (%):
+modello/config                                  worst intermediate transition  off_track
+h3 · v1_gemma-4-26b                             69.0%      83.1%      64.7%      50.6%
+h3 · v1_gpt-oss_120b                            36.4%      65.2%      76.1%      47.4%
+h3 · v2_gemma-4-26b                             76.0%      87.9%      84.7%      73.7%
+h3 · v2_gpt-oss_120b                            90.9%      83.3%      89.2%      97.0%
+
+Accuracy per azione ottima (per ogni azione ottima, quante volte LLM la sceglie):
+modello/config                                 left    right  forward   pickup   toggle
+h3 · v1_gemma-4-26b                           68.3%    63.8%    76.4%    28.6%    73.3%
+h3 · v1_gpt-oss_120b                          48.9%    71.4%    67.4%    68.4%    61.5%
+h3 · v2_gemma-4-26b                           83.3%    87.2%    74.3%    78.4%    84.8%
+h3 · v2_gpt-oss_120b                          90.9%    80.0%    85.7%   100.0%    92.3%
+
+----------------------------------------------------------------------
+GIUDIZIO SUL MODELLO MIGLIORE
+----------------------------------------------------------------------
+Basato su CCC (valore) e accuracy (selezione azione), con IC 95% e failure rate.
+-> Miglior CCC (valore):       h3 · v2_gemma-4-26b  CCC=0.180
+-> Miglior accuracy (azione):  h3 · v2_gpt-oss_120b  acc=90.1%
+
+Immagini generate:
+  - confronto_00_errori_valore.png
+  - confronto_01_correlazioni_valore.png
+  - confronto_02_boxplot_errori_valore.png
+  - confronto_03_heatmap_tipo_valore.png
+  - confronto_04_bias_valore.png
+  - confronto_05_failure_rate_valore.png
+  - confronto_06_calibrazione_valore.png
+  - confronto_07_ecdf_errori_valore.png
+  - confronto_08_scatter_riepilogo_valore.png
+  - confronto_09_accuracy_azione.png
+  - confronto_10_accuracy_per_tipo.png
+  - confronto_11_confusion_matrix.png
+  - confronto_12_value_loss.png
+  - confronto_13_per_action_accuracy.png
+  - confronto_14_accuracy_per_nmaps.png

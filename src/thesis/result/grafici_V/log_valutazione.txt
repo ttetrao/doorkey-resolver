@@ -1,0 +1,562 @@
+======================================================================
+LOG DI VALUTAZIONE DEL MODELLO LLM (v_value vs v_llm)
+Generato il: 2026-08-29 09:12:21
+Sorgente: /tmp/filtered_V_all
+File CSV analizzati: 8
+======================================================================
+
+NOTE METODOLOGICHE:
+- v_value e' la V* ottima calcolata via value iteration (gamma=0.99).
+- Le righe con v_llm == 0.0 vengono contate come FAILURE e riportate come failure_rate.
+- Pearson r e CCC (Lin) sono accompagnati da IC 95% via bootstrap sui seed.
+- CCC e' la metrica corretta per misurare ACCORDO: penalizza bias sistematici e slope != 1.
+- R^2 ora e' quello di regressione (NON piu' Pearson^2).
+- La calibrazione (slope, intercept di v_llm ~ v_value) e' riportata esplicitamente.
+- MAE stratificato per n_maps permette di confrontare i tipi di traiettoria a parita' di contesto.
+- Il giudizio 'migliore' non si basa solo sul MAE, ma su IC, CCC, failure rate e sample size.
+- L'AGREEMENT CATEGORIALE valuta se le stime cadono nelle fasce Basso/Medio/Alto.
+  Le soglie delle fasce sono calcolate usando i quantili 33°/66° specifici per ogni tipo di traiettoria.
+
+----------------------------------------------------------------------
+FILE: /tmp/filtered_V_all/h1/gemma-4-26b.csv
+Modello: gemma-4-26b   |   Configurazione: h1   |   Variante: default
+----------------------------------------------------------------------
+Righe totali nel CSV: 319
+  di cui FAILURE (v_llm == 0.0): 0  (0.0%)
+  di cui valutate (v_llm != 0.0): 319
+  seed unici rappresentati: 30
+
+Metriche di accordo (calcolate solo sulle stime valide):
+  MAE  (errore assoluto medio):        0.0193  [IC 95%: 0.0170, 0.0214]
+  RMSE (radice errore quadratico):     0.0293
+  Errore massimo:                      0.1320
+  Bias medio (v_llm - v_value):        -0.0028  (v_llm tende a SOTTOstimare)
+  Pearson r  (correlazione lineare):   0.8447  [IC 95%: 0.8058, 0.8888]  (p-value=4.92e-88)
+  Spearman rho (correlazione di rango):0.8442  (p-value=7.28e-88)
+  CCC (Lin, concordanza):               0.8362  [IC 95%: 0.7930, 0.8820]
+  R^2 di regressione (vero, NON pearson^2): 0.7134
+  Calibrazione:  slope = 0.7408,  intercept = +0.2327
+
+Accordo Categoriale (Basso/Medio/Alto relativo al tipo):
+  Metodo soglie: quantili 33°/66° per tipo traiettoria
+    Tipo 'initial': Basso <= 0.843 <= Medio <= 0.861 <= Alto
+    Tipo 'intermediate': Basso <= 0.904 <= Medio <= 0.980 <= Alto
+    Tipo 'off_track': Basso <= 0.869 <= Medio <= 0.904 <= Alto
+    Tipo 'transition': Basso <= 0.917 <= Medio <= 0.970 <= Alto
+    Tipo 'worst': Basso <= 0.839 <= Medio <= 0.861 <= Alto
+  Match Overall (v_llm nella stessa fascia di v_value): 70.8%
+    Tipo 'initial': 60.0%
+    Tipo 'intermediate': 77.9%
+    Tipo 'off_track': 61.4%
+    Tipo 'transition': 83.3%
+    Tipo 'worst': 50.0%
+
+MAE per tipo di traiettoria:
+    worst           MAE=0.0257  (n=30)
+    initial         MAE=0.0229  (n=30)
+    transition      MAE=0.0197  (n=90)
+    off_track       MAE=0.0178  (n=83)
+    intermediate    MAE=0.0168  (n=86)
+MAE per evento:
+    reach_goal      MAE=0.0268
+    find_key        MAE=0.0208
+    open_door       MAE=0.0091
+MAE per n_maps (contesto fornito all'LLM):
+    n_maps=1    MAE=0.0193  (n=319)
+Immagini generate per questo file:
+  - h1_gemma-4-26b_1_scatter.png
+  - h1_gemma-4-26b_2_residui.png
+  - h1_gemma-4-26b_3_distribuzione_errori.png
+  - h1_gemma-4-26b_4_mae_per_tipo.png
+  - h1_gemma-4-26b_5_mae_per_evento.png
+  - h1_gemma-4-26b_6_bias_per_tipo.png
+  - h1_gemma-4-26b_7_mae_per_nmaps.png
+  - h1_gemma-4-26b_8_categoriale.png: heatmaps 3x3 dell'accordo categoriale (Overall + per tipo).
+
+----------------------------------------------------------------------
+FILE: /tmp/filtered_V_all/h1/gpt-oss_120b.csv
+Modello: gpt-oss_120b   |   Configurazione: h1   |   Variante: default
+----------------------------------------------------------------------
+Righe totali nel CSV: 122
+  di cui FAILURE (v_llm == 0.0): 4  (3.3%)
+  di cui valutate (v_llm != 0.0): 118
+  seed unici rappresentati: 30
+
+Metriche di accordo (calcolate solo sulle stime valide):
+  MAE  (errore assoluto medio):        0.0343  [IC 95%: 0.0257, 0.0414]
+  RMSE (radice errore quadratico):     0.0605
+  Errore massimo:                      0.2085
+  Bias medio (v_llm - v_value):        -0.0336  (v_llm tende a SOTTOstimare)
+  Pearson r  (correlazione lineare):   0.8149  [IC 95%: 0.7783, 0.8679]  (p-value=2.99e-29)
+  Spearman rho (correlazione di rango):0.8788  (p-value=4.49e-39)
+  CCC (Lin, concordanza):               0.6742  [IC 95%: 0.6068, 0.7689]
+  R^2 di regressione (vero, NON pearson^2): 0.6641
+  Calibrazione:  slope = 1.2362,  intercept = -0.2481
+
+Accordo Categoriale (Basso/Medio/Alto relativo al tipo):
+  Metodo soglie: quantili 33°/66° per tipo traiettoria
+    Tipo 'initial': Basso <= 0.826 <= Medio <= 0.860 <= Alto
+    Tipo 'intermediate': Basso <= 0.887 <= Medio <= 0.942 <= Alto
+    Tipo 'off_track': Basso <= 0.869 <= Medio <= 0.904 <= Alto
+    Tipo 'transition': Basso <= 0.923 <= Medio <= 1.000 <= Alto
+    Tipo 'worst': Basso <= 0.851 <= Medio <= 0.868 <= Alto
+  Match Overall (v_llm nella stessa fascia di v_value): 75.4%
+    Tipo 'initial': 30.0%
+    Tipo 'intermediate': 84.6%
+    Tipo 'off_track': 65.4%
+    Tipo 'transition': 96.7%
+    Tipo 'worst': 53.8%
+
+MAE per tipo di traiettoria:
+    worst           MAE=0.0725  (n=13)
+    initial         MAE=0.0481  (n=10)
+    off_track       MAE=0.0329  (n=26)
+    intermediate    MAE=0.0289  (n=39)
+    transition      MAE=0.0215  (n=30)
+MAE per evento:
+    find_key        MAE=0.0515
+    open_door       MAE=0.0229
+    reach_goal      MAE=0.0196
+MAE per n_maps (contesto fornito all'LLM):
+    n_maps=1    MAE=0.0343  (n=118)
+Immagini generate per questo file:
+  - h1_gpt-oss_120b_1_scatter.png
+  - h1_gpt-oss_120b_2_residui.png
+  - h1_gpt-oss_120b_3_distribuzione_errori.png
+  - h1_gpt-oss_120b_4_mae_per_tipo.png
+  - h1_gpt-oss_120b_5_mae_per_evento.png
+  - h1_gpt-oss_120b_6_bias_per_tipo.png
+  - h1_gpt-oss_120b_7_mae_per_nmaps.png
+  - h1_gpt-oss_120b_8_categoriale.png: heatmaps 3x3 dell'accordo categoriale (Overall + per tipo).
+
+----------------------------------------------------------------------
+FILE: /tmp/filtered_V_all/h3/gemma-4-26b.csv
+Modello: gemma-4-26b   |   Configurazione: h3   |   Variante: default
+----------------------------------------------------------------------
+Righe totali nel CSV: 301
+  di cui FAILURE (v_llm == 0.0): 0  (0.0%)
+  di cui valutate (v_llm != 0.0): 301
+  seed unici rappresentati: 30
+
+Metriche di accordo (calcolate solo sulle stime valide):
+  MAE  (errore assoluto medio):        0.0165  [IC 95%: 0.0153, 0.0179]
+  RMSE (radice errore quadratico):     0.0210
+  Errore massimo:                      0.0761
+  Bias medio (v_llm - v_value):        -0.0008  (v_llm tende a SOTTOstimare)
+  Pearson r  (correlazione lineare):   0.9222  [IC 95%: 0.9051, 0.9371]  (p-value=2.00e-125)
+  Spearman rho (correlazione di rango):0.9238  (p-value=1.12e-126)
+  CCC (Lin, concordanza):               0.9155  [IC 95%: 0.8988, 0.9295]
+  R^2 di regressione (vero, NON pearson^2): 0.8505
+  Calibrazione:  slope = 0.8176,  intercept = +0.1645
+
+Accordo Categoriale (Basso/Medio/Alto relativo al tipo):
+  Metodo soglie: quantili 33°/66° per tipo traiettoria
+    Tipo 'initial': Basso <= 0.843 <= Medio <= 0.860 <= Alto
+    Tipo 'intermediate': Basso <= 0.899 <= Medio <= 0.975 <= Alto
+    Tipo 'off_track': Basso <= 0.869 <= Medio <= 0.899 <= Alto
+    Tipo 'transition': Basso <= 0.923 <= Medio <= 0.993 <= Alto
+    Tipo 'worst': Basso <= 0.839 <= Medio <= 0.861 <= Alto
+  Match Overall (v_llm nella stessa fascia di v_value): 59.8%
+    Tipo 'initial': 66.7%
+    Tipo 'intermediate': 66.7%
+    Tipo 'off_track': 57.3%
+    Tipo 'transition': 59.5%
+    Tipo 'worst': 43.3%
+
+MAE per tipo di traiettoria:
+    worst           MAE=0.0215  (n=30)
+    off_track       MAE=0.0207  (n=82)
+    initial         MAE=0.0158  (n=27)
+    intermediate    MAE=0.0148  (n=78)
+    transition      MAE=0.0124  (n=84)
+MAE per evento:
+    reach_goal      MAE=0.0198
+    find_key        MAE=0.0175
+    open_door       MAE=0.0114
+MAE per n_maps (contesto fornito all'LLM):
+    n_maps=1    MAE=0.0188  (n=57)
+    n_maps=2    MAE=0.0148  (n=9)
+    n_maps=3    MAE=0.0160  (n=235)
+Immagini generate per questo file:
+  - h3_gemma-4-26b_1_scatter.png
+  - h3_gemma-4-26b_2_residui.png
+  - h3_gemma-4-26b_3_distribuzione_errori.png
+  - h3_gemma-4-26b_4_mae_per_tipo.png
+  - h3_gemma-4-26b_5_mae_per_evento.png
+  - h3_gemma-4-26b_6_bias_per_tipo.png
+  - h3_gemma-4-26b_7_mae_per_nmaps.png
+  - h3_gemma-4-26b_8_categoriale.png: heatmaps 3x3 dell'accordo categoriale (Overall + per tipo).
+
+----------------------------------------------------------------------
+FILE: /tmp/filtered_V_all/h3/gemma-4-26b_no_analisys.csv
+Modello: gemma-4-26b   |   Configurazione: h3   |   Variante: no_analisys
+----------------------------------------------------------------------
+Righe totali nel CSV: 319
+  di cui FAILURE (v_llm == 0.0): 0  (0.0%)
+  di cui valutate (v_llm != 0.0): 319
+  seed unici rappresentati: 30
+
+Metriche di accordo (calcolate solo sulle stime valide):
+  MAE  (errore assoluto medio):        0.0292  [IC 95%: 0.0218, 0.0366]
+  RMSE (radice errore quadratico):     0.0685
+  Errore massimo:                      0.5345
+  Bias medio (v_llm - v_value):        -0.0120  (v_llm tende a SOTTOstimare)
+  Pearson r  (correlazione lineare):   0.6110  [IC 95%: 0.5475, 0.7271]  (p-value=4.96e-34)
+  Spearman rho (correlazione di rango):0.8540  (p-value=5.96e-92)
+  CCC (Lin, concordanza):               0.5447  [IC 95%: 0.4444, 0.7114]
+  R^2 di regressione (vero, NON pearson^2): 0.3733
+  Calibrazione:  slope = 0.9643,  intercept = +0.0203
+
+Accordo Categoriale (Basso/Medio/Alto relativo al tipo):
+  Metodo soglie: quantili 33°/66° per tipo traiettoria
+    Tipo 'initial': Basso <= 0.843 <= Medio <= 0.861 <= Alto
+    Tipo 'intermediate': Basso <= 0.904 <= Medio <= 0.980 <= Alto
+    Tipo 'off_track': Basso <= 0.869 <= Medio <= 0.904 <= Alto
+    Tipo 'transition': Basso <= 0.917 <= Medio <= 0.970 <= Alto
+    Tipo 'worst': Basso <= 0.839 <= Medio <= 0.861 <= Alto
+  Match Overall (v_llm nella stessa fascia di v_value): 69.9%
+    Tipo 'initial': 60.0%
+    Tipo 'intermediate': 81.4%
+    Tipo 'off_track': 60.2%
+    Tipo 'transition': 78.9%
+    Tipo 'worst': 46.7%
+
+MAE per tipo di traiettoria:
+    worst           MAE=0.0672  (n=30)
+    initial         MAE=0.0518  (n=30)
+    off_track       MAE=0.0258  (n=83)
+    transition      MAE=0.0220  (n=90)
+    intermediate    MAE=0.0186  (n=86)
+MAE per evento:
+    find_key        MAE=0.0395
+    reach_goal      MAE=0.0281
+    open_door       MAE=0.0133
+MAE per n_maps (contesto fornito all'LLM):
+    n_maps=1    MAE=0.0595  (n=60)
+    n_maps=2    MAE=0.0224  (n=9)
+    n_maps=3    MAE=0.0221  (n=250)
+Immagini generate per questo file:
+  - h3_gemma-4-26b_no_analisys_1_scatter.png
+  - h3_gemma-4-26b_no_analisys_2_residui.png
+  - h3_gemma-4-26b_no_analisys_3_distribuzione_errori.png
+  - h3_gemma-4-26b_no_analisys_4_mae_per_tipo.png
+  - h3_gemma-4-26b_no_analisys_5_mae_per_evento.png
+  - h3_gemma-4-26b_no_analisys_6_bias_per_tipo.png
+  - h3_gemma-4-26b_no_analisys_7_mae_per_nmaps.png
+  - h3_gemma-4-26b_no_analisys_8_categoriale.png: heatmaps 3x3 dell'accordo categoriale (Overall + per tipo).
+
+----------------------------------------------------------------------
+FILE: /tmp/filtered_V_all/h3/gpt-oss_120b.csv
+Modello: gpt-oss_120b   |   Configurazione: h3   |   Variante: default
+----------------------------------------------------------------------
+Righe totali nel CSV: 125
+  di cui FAILURE (v_llm == 0.0): 2  (1.6%)
+  di cui valutate (v_llm != 0.0): 123
+  seed unici rappresentati: 30
+
+Metriche di accordo (calcolate solo sulle stime valide):
+  MAE  (errore assoluto medio):        0.0559  [IC 95%: 0.0485, 0.0634]
+  RMSE (radice errore quadratico):     0.0739
+  Errore massimo:                      0.2311
+  Bias medio (v_llm - v_value):        -0.0265  (v_llm tende a SOTTOstimare)
+  Pearson r  (correlazione lineare):   0.6756  [IC 95%: 0.5789, 0.7669]  (p-value=1.02e-17)
+  Spearman rho (correlazione di rango):0.6803  (p-value=4.98e-18)
+  CCC (Lin, concordanza):               0.5580  [IC 95%: 0.4787, 0.6334]
+  R^2 di regressione (vero, NON pearson^2): 0.4564
+  Calibrazione:  slope = 1.1450,  intercept = -0.1589
+
+Accordo Categoriale (Basso/Medio/Alto relativo al tipo):
+  Metodo soglie: quantili 33°/66° per tipo traiettoria
+    Tipo 'initial': Basso <= 0.845 <= Medio <= 0.865 <= Alto
+    Tipo 'intermediate': Basso <= 0.909 <= Medio <= 0.980 <= Alto
+    Tipo 'off_track': Basso <= 0.869 <= Medio <= 0.897 <= Alto
+    Tipo 'transition': Basso <= 0.928 <= Medio <= 1.000 <= Alto
+    Tipo 'worst': Basso <= 0.843 <= Medio <= 0.869 <= Alto
+  Match Overall (v_llm nella stessa fascia di v_value): 61.8%
+    Tipo 'initial': 45.5%
+    Tipo 'intermediate': 66.7%
+    Tipo 'off_track': 46.7%
+    Tipo 'transition': 83.3%
+    Tipo 'worst': 38.5%
+
+MAE per tipo di traiettoria:
+    worst           MAE=0.0748  (n=13)
+    off_track       MAE=0.0723  (n=30)
+    initial         MAE=0.0697  (n=11)
+    intermediate    MAE=0.0439  (n=33)
+    transition      MAE=0.0421  (n=36)
+MAE per evento:
+    find_key        MAE=0.0795
+    open_door       MAE=0.0557
+    reach_goal      MAE=0.0255
+MAE per n_maps (contesto fornito all'LLM):
+    n_maps=1    MAE=0.0724  (n=24)
+    n_maps=2    MAE=0.0900  (n=7)
+    n_maps=3    MAE=0.0489  (n=92)
+Immagini generate per questo file:
+  - h3_gpt-oss_120b_1_scatter.png
+  - h3_gpt-oss_120b_2_residui.png
+  - h3_gpt-oss_120b_3_distribuzione_errori.png
+  - h3_gpt-oss_120b_4_mae_per_tipo.png
+  - h3_gpt-oss_120b_5_mae_per_evento.png
+  - h3_gpt-oss_120b_6_bias_per_tipo.png
+  - h3_gpt-oss_120b_7_mae_per_nmaps.png
+  - h3_gpt-oss_120b_8_categoriale.png: heatmaps 3x3 dell'accordo categoriale (Overall + per tipo).
+
+----------------------------------------------------------------------
+FILE: /tmp/filtered_V_all/h3/gpt-oss_120b_no_analisys.csv
+Modello: gpt-oss_120b   |   Configurazione: h3   |   Variante: no_analisys
+----------------------------------------------------------------------
+Righe totali nel CSV: 224
+  di cui FAILURE (v_llm == 0.0): 21  (9.4%)
+  di cui valutate (v_llm != 0.0): 203
+  seed unici rappresentati: 30
+
+Metriche di accordo (calcolate solo sulle stime valide):
+  MAE  (errore assoluto medio):        0.0461  [IC 95%: 0.0353, 0.0596]
+  RMSE (radice errore quadratico):     0.0864
+  Errore massimo:                      0.4715
+  Bias medio (v_llm - v_value):        -0.0189  (v_llm tende a SOTTOstimare)
+  Pearson r  (correlazione lineare):   0.5371  [IC 95%: 0.4425, 0.6535]  (p-value=1.44e-16)
+  Spearman rho (correlazione di rango):0.6439  (p-value=3.67e-25)
+  CCC (Lin, concordanza):               0.4426  [IC 95%: 0.3375, 0.5927]
+  R^2 di regressione (vero, NON pearson^2): 0.2885
+  Calibrazione:  slope = 0.9723,  intercept = +0.0062
+
+Accordo Categoriale (Basso/Medio/Alto relativo al tipo):
+  Metodo soglie: quantili 33°/66° per tipo traiettoria
+    Tipo 'initial': Basso <= 0.843 <= Medio <= 0.869 <= Alto
+    Tipo 'intermediate': Basso <= 0.885 <= Medio <= 0.970 <= Alto
+    Tipo 'off_track': Basso <= 0.869 <= Medio <= 0.904 <= Alto
+    Tipo 'transition': Basso <= 0.915 <= Medio <= 1.000 <= Alto
+    Tipo 'worst': Basso <= 0.843 <= Medio <= 0.862 <= Alto
+  Match Overall (v_llm nella stessa fascia di v_value): 66.5%
+    Tipo 'initial': 50.0%
+    Tipo 'intermediate': 63.5%
+    Tipo 'off_track': 63.8%
+    Tipo 'transition': 83.1%
+    Tipo 'worst': 52.4%
+
+MAE per tipo di traiettoria:
+    worst           MAE=0.0663  (n=21)
+    initial         MAE=0.0557  (n=24)
+    off_track       MAE=0.0535  (n=47)
+    transition      MAE=0.0394  (n=59)
+    intermediate    MAE=0.0342  (n=52)
+MAE per evento:
+    find_key        MAE=0.0619
+    open_door       MAE=0.0438
+    reach_goal      MAE=0.0208
+MAE per n_maps (contesto fornito all'LLM):
+    n_maps=1    MAE=0.0606  (n=45)
+    n_maps=2    MAE=0.0962  (n=7)
+    n_maps=3    MAE=0.0394  (n=151)
+Immagini generate per questo file:
+  - h3_gpt-oss_120b_no_analisys_1_scatter.png
+  - h3_gpt-oss_120b_no_analisys_2_residui.png
+  - h3_gpt-oss_120b_no_analisys_3_distribuzione_errori.png
+  - h3_gpt-oss_120b_no_analisys_4_mae_per_tipo.png
+  - h3_gpt-oss_120b_no_analisys_5_mae_per_evento.png
+  - h3_gpt-oss_120b_no_analisys_6_bias_per_tipo.png
+  - h3_gpt-oss_120b_no_analisys_7_mae_per_nmaps.png
+  - h3_gpt-oss_120b_no_analisys_8_categoriale.png: heatmaps 3x3 dell'accordo categoriale (Overall + per tipo).
+
+----------------------------------------------------------------------
+FILE: /tmp/filtered_V_all/h5/gemma-4-26b.csv
+Modello: gemma-4-26b   |   Configurazione: h5   |   Variante: default
+----------------------------------------------------------------------
+Righe totali nel CSV: 309
+  di cui FAILURE (v_llm == 0.0): 0  (0.0%)
+  di cui valutate (v_llm != 0.0): 309
+  seed unici rappresentati: 30
+
+Metriche di accordo (calcolate solo sulle stime valide):
+  MAE  (errore assoluto medio):        0.0157  [IC 95%: 0.0137, 0.0178]
+  RMSE (radice errore quadratico):     0.0240
+  Errore massimo:                      0.1401
+  Bias medio (v_llm - v_value):        -0.0058  (v_llm tende a SOTTOstimare)
+  Pearson r  (correlazione lineare):   0.9041  [IC 95%: 0.8717, 0.9307]  (p-value=2.11e-115)
+  Spearman rho (correlazione di rango):0.9057  (p-value=1.99e-116)
+  CCC (Lin, concordanza):               0.8976  [IC 95%: 0.8609, 0.9278]
+  R^2 di regressione (vero, NON pearson^2): 0.8174
+  Calibrazione:  slope = 0.8592,  intercept = +0.1220
+
+Accordo Categoriale (Basso/Medio/Alto relativo al tipo):
+  Metodo soglie: quantili 33°/66° per tipo traiettoria
+    Tipo 'initial': Basso <= 0.843 <= Medio <= 0.860 <= Alto
+    Tipo 'intermediate': Basso <= 0.896 <= Medio <= 0.954 <= Alto
+    Tipo 'off_track': Basso <= 0.869 <= Medio <= 0.904 <= Alto
+    Tipo 'transition': Basso <= 0.913 <= Medio <= 0.970 <= Alto
+    Tipo 'worst': Basso <= 0.839 <= Medio <= 0.861 <= Alto
+  Match Overall (v_llm nella stessa fascia di v_value): 75.4%
+    Tipo 'initial': 62.1%
+    Tipo 'intermediate': 86.7%
+    Tipo 'off_track': 68.4%
+    Tipo 'transition': 85.2%
+    Tipo 'worst': 46.7%
+
+MAE per tipo di traiettoria:
+    off_track       MAE=0.0191  (n=79)
+    worst           MAE=0.0177  (n=30)
+    initial         MAE=0.0166  (n=29)
+    transition      MAE=0.0138  (n=88)
+    intermediate    MAE=0.0136  (n=83)
+MAE per evento:
+    reach_goal      MAE=0.0226
+    find_key        MAE=0.0155
+    open_door       MAE=0.0092
+MAE per n_maps (contesto fornito all'LLM):
+    n_maps=1    MAE=0.0172  (n=59)
+    n_maps=2    MAE=0.0100  (n=9)
+    n_maps=3    MAE=0.0078  (n=4)
+    n_maps=4    MAE=0.0174  (n=2)
+    n_maps=5    MAE=0.0157  (n=235)
+Immagini generate per questo file:
+  - h5_gemma-4-26b_1_scatter.png
+  - h5_gemma-4-26b_2_residui.png
+  - h5_gemma-4-26b_3_distribuzione_errori.png
+  - h5_gemma-4-26b_4_mae_per_tipo.png
+  - h5_gemma-4-26b_5_mae_per_evento.png
+  - h5_gemma-4-26b_6_bias_per_tipo.png
+  - h5_gemma-4-26b_7_mae_per_nmaps.png
+  - h5_gemma-4-26b_8_categoriale.png: heatmaps 3x3 dell'accordo categoriale (Overall + per tipo).
+
+----------------------------------------------------------------------
+FILE: /tmp/filtered_V_all/h5/gpt-oss_120b.csv
+Modello: gpt-oss_120b   |   Configurazione: h5   |   Variante: default
+----------------------------------------------------------------------
+Righe totali nel CSV: 149
+  di cui FAILURE (v_llm == 0.0): 10  (6.7%)
+  di cui valutate (v_llm != 0.0): 139
+  seed unici rappresentati: 30
+
+Metriche di accordo (calcolate solo sulle stime valide):
+  MAE  (errore assoluto medio):        0.0320  [IC 95%: 0.0207, 0.0449]
+  RMSE (radice errore quadratico):     0.0863
+  Errore massimo:                      0.5679
+  Bias medio (v_llm - v_value):        -0.0261  (v_llm tende a SOTTOstimare)
+  Pearson r  (correlazione lineare):   0.5794  [IC 95%: 0.4898, 0.7715]  (p-value=7.91e-14)
+  Spearman rho (correlazione di rango):0.8602  (p-value=6.61e-42)
+  CCC (Lin, concordanza):               0.4505  [IC 95%: 0.3388, 0.7176]
+  R^2 di regressione (vero, NON pearson^2): 0.3357
+  Calibrazione:  slope = 1.1145,  intercept = -0.1298
+
+Accordo Categoriale (Basso/Medio/Alto relativo al tipo):
+  Metodo soglie: quantili 33°/66° per tipo traiettoria
+    Tipo 'initial': Basso <= 0.860 <= Medio <= 0.869 <= Alto
+    Tipo 'intermediate': Basso <= 0.897 <= Medio <= 0.932 <= Alto
+    Tipo 'off_track': Basso <= 0.870 <= Medio <= 0.904 <= Alto
+    Tipo 'transition': Basso <= 0.923 <= Medio <= 0.961 <= Alto
+    Tipo 'worst': Basso <= 0.843 <= Medio <= 0.868 <= Alto
+  Match Overall (v_llm nella stessa fascia di v_value): 74.8%
+    Tipo 'initial': 60.0%
+    Tipo 'intermediate': 82.9%
+    Tipo 'off_track': 79.5%
+    Tipo 'transition': 81.1%
+    Tipo 'worst': 30.8%
+
+MAE per tipo di traiettoria:
+    initial         MAE=0.0716  (n=10)
+    transition      MAE=0.0477  (n=37)
+    worst           MAE=0.0258  (n=13)
+    off_track       MAE=0.0251  (n=44)
+    intermediate    MAE=0.0150  (n=35)
+MAE per evento:
+    find_key        MAE=0.0451
+    reach_goal      MAE=0.0274
+    open_door       MAE=0.0175
+MAE per n_maps (contesto fornito all'LLM):
+    n_maps=1    MAE=0.0457  (n=23)
+    n_maps=2    MAE=0.0153  (n=6)
+    n_maps=3    MAE=0.0253  (n=1)
+    n_maps=4    MAE=0.4353  (n=1)
+    n_maps=5    MAE=0.0263  (n=108)
+Immagini generate per questo file:
+  - h5_gpt-oss_120b_1_scatter.png
+  - h5_gpt-oss_120b_2_residui.png
+  - h5_gpt-oss_120b_3_distribuzione_errori.png
+  - h5_gpt-oss_120b_4_mae_per_tipo.png
+  - h5_gpt-oss_120b_5_mae_per_evento.png
+  - h5_gpt-oss_120b_6_bias_per_tipo.png
+  - h5_gpt-oss_120b_7_mae_per_nmaps.png
+  - h5_gpt-oss_120b_8_categoriale.png: heatmaps 3x3 dell'accordo categoriale (Overall + per tipo).
+
+======================================================================
+CONFRONTO GLOBALE TRA MODELLI / CONFIGURAZIONI
+======================================================================
+modello/config                                 n  fail%      MAE     RMSE      Pearson r [IC95%]            CCC [IC95%]  slope     bias
+h1 · gemma-4-26b                             319   0.0%   0.0193   0.0293    0.845 [0.806,0.889]    0.836 [0.793,0.882]  0.741  -0.0028
+h3 · gemma-4-26b                             301   0.0%   0.0165   0.0210    0.922 [0.905,0.937]    0.915 [0.899,0.930]  0.818  -0.0008
+h3 · gemma-4-26b_no_analisys                 319   0.0%   0.0292   0.0685    0.611 [0.547,0.727]    0.545 [0.444,0.711]  0.964  -0.0120
+h5 · gemma-4-26b                             309   0.0%   0.0157   0.0240    0.904 [0.872,0.931]    0.898 [0.861,0.928]  0.859  -0.0058
+h1 · gpt-oss_120b                            118   3.3%   0.0343   0.0605    0.815 [0.778,0.868]    0.674 [0.607,0.769]  1.236  -0.0336
+h3 · gpt-oss_120b                            123   1.6%   0.0559   0.0739    0.676 [0.579,0.767]    0.558 [0.479,0.633]  1.145  -0.0265
+h3 · gpt-oss_120b_no_analisys                203   9.4%   0.0461   0.0864    0.537 [0.442,0.653]    0.443 [0.337,0.593]  0.972  -0.0189
+h5 · gpt-oss_120b                            139   6.7%   0.0320   0.0863    0.579 [0.490,0.771]    0.451 [0.339,0.718]  1.114  -0.0261
+
+MAE per n_maps (numero di mappe di contesto):
+modello/config                               n_maps=1   n_maps=3   n_maps=5
+h1 · gemma-4-26b                               0.0193        nan        nan
+h3 · gemma-4-26b                               0.0188     0.0160        nan
+h3 · gemma-4-26b_no_analisys                   0.0595     0.0221        nan
+h5 · gemma-4-26b                               0.0172     0.0078     0.0157
+h1 · gpt-oss_120b                              0.0343        nan        nan
+h3 · gpt-oss_120b                              0.0724     0.0489        nan
+h3 · gpt-oss_120b_no_analisys                  0.0606     0.0394        nan
+h5 · gpt-oss_120b                              0.0457     0.0253     0.0263
+
+----------------------------------------------------------------------
+GIUDIZIO SUL MODELLO MIGLIORE
+----------------------------------------------------------------------
+NOTA METODOLOGICA: il giudizio non si basa solo sul MAE, ma su un insieme
+di metriche che includono IC 95%, failure rate, CCC (calibrazione) e sample size.
+Modelli con sample size molto piccoli (n < 100) hanno IC larghi e non sono
+direttamente confrontabili con quelli con n > 300. In caso di IC sovrapposti,
+le differenze non sono statisticamente significative.
+
+-> Miglior CCC (calibrazione + accordo): h3 · gemma-4-26b
+   CCC = 0.915 [IC 95%: 0.899, 0.930]
+   MAE = 0.0165 [IC 95%: 0.0153, 0.0179]
+   failure rate = 0.0%, slope = 0.818
+
+-> Peggiore CCC: h3 · gemma-4-26b_no_analisys
+   CCC = 0.545 [IC 95%: 0.444, 0.711]
+
+Modelli esclusi dal giudizio (n < 100 oppure failure rate >= 5%):
+  - h3 · gpt-oss_120b_no_analisys: failure rate=9.4% (>=5%)
+  - h5 · gpt-oss_120b: failure rate=6.7% (>=5%)
+
+Percentuale di stime con errore sotto una soglia:
+modello/config                               entro 0.05   entro 0.10
+h1 · gemma-4-26b                                  92.5%        97.5%
+h3 · gemma-4-26b                                  98.0%       100.0%
+h3 · gemma-4-26b_no_analisys                      89.3%        95.3%
+h5 · gemma-4-26b                                  95.1%        99.0%
+h1 · gpt-oss_120b                                 83.1%        88.1%
+h3 · gpt-oss_120b                                 54.5%        81.3%
+h3 · gpt-oss_120b_no_analisys                     74.4%        88.7%
+h5 · gpt-oss_120b                                 90.6%        95.7%
+
+Accordo Categoriale (Basso/Medio/Alto basato su quantili 33°/66° per tipo traiettoria):
+modello/config                               Overall Match    initial      worst    interm.     trans.    off_tr.
+h1 · gemma-4-26b                                     70.8%      60.0%      50.0%      77.9%      83.3%      61.4%
+h3 · gemma-4-26b                                     59.8%      66.7%      43.3%      66.7%      59.5%      57.3%
+h3 · gemma-4-26b_no_analisys                         69.9%      60.0%      46.7%      81.4%      78.9%      60.2%
+h5 · gemma-4-26b                                     75.4%      62.1%      46.7%      86.7%      85.2%      68.4%
+h1 · gpt-oss_120b                                    75.4%      30.0%      53.8%      84.6%      96.7%      65.4%
+h3 · gpt-oss_120b                                    61.8%      45.5%      38.5%      66.7%      83.3%      46.7%
+h3 · gpt-oss_120b_no_analisys                        66.5%      50.0%      52.4%      63.5%      83.1%      63.8%
+h5 · gpt-oss_120b                                    74.8%      60.0%      30.8%      82.9%      81.1%      79.5%
+
+Immagini di confronto generate:
+  - confronto_00_errori.png: MAE (con IC 95%) e RMSE per ogni modello/config.
+  - confronto_01_correlazioni.png: Pearson r e CCC (Lin) con IC 95% per ogni modello/config.
+  - confronto_02_boxplot_errori.png: boxplot (scala log, jitter per err=0) degli errori assoluti; colore = modello, tratteggio = config.
+  - confronto_03_heatmap_tipo.png: MAE per tipo di traiettoria (con n), una colonna per modello/config.
+  - confronto_04_bias.png: bias medio con segno; >0 = sovrastima, <0 = sottostima.
+  - confronto_04b_bias_per_tipo.png: heatmap del bias per tipo di traiettoria; blu = sottostima, rosso = sovrastima.
+  - confronto_05_ecdf_errori.png: ECDF degli errori assoluti; la quota di stime sotto una data soglia.
+  - confronto_06_scatter_riepilogo.png: griglia di scatter (con retta y=x e retta di regressione), uno per modello/config.
+  - confronto_07_failure_rate.png: failure rate per ogni modello/config (verde < 1%, arancio < 5%, rosso >= 5%).
+  - confronto_08_calibrazione.png: calibrazione (slope e intercept della regressione v_llm ~ v_value).
+  - confronto_09_categoriale_globale.png: confronto del match categoriale (Basso/Medio/Alto relativo al tipo) diviso per tipo di traiettoria.

@@ -1,0 +1,12 @@
+[{
+ "code": "000030",
+ "analisys": "Lo stato finale mostra l'agente caricato (L) in posizione (riga 5, colonna 6) con orientamento verso destra. La porta è già aperta (D(O)) e la casella goal (G) è subito sotto l'agente, ma l'azione forward muove nella direzione corrente (destra) ed è quindi inefficace. L'azione più vantaggiosa è girare a destra (right) per puntare verso il basso e poi avanzare (forward) per raggiungere il goal in un passo. Le altre azioni non avvicinano l'agente al goal: left lo fa girare verso l'alto, pickup è inutile perché l'agente ha già la chiave, drop è inutilizzato e toggle non ha effetto sulla porta aperta. Pertanto i valori Q sono assegnati in modo proporzionale all'utilità attesa, normalizzati fra 0 e 1.",
+ "q-function-values": {
+   "left": 0.1,
+   "right": 0.9,
+   "forward": 0.3,
+   "pickup": 0.0,
+   "drop": 0.0,
+   "toggle": 0.2
+ }
+}]

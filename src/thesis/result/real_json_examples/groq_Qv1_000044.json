@@ -1,0 +1,12 @@
+[{
+  "code": "000044",
+  "analisys": "L'agente è orientato a destra di fronte a un muro; la chiave è in alto a sinistra. L'azione più vantaggiosa è girare a sinistra (left) per puntare verso l'alto e avvicinarsi alla chiave, massimizzando la probabilità di raggiungere l'obiettivo finale. Girare a destra (right) porta verso il basso, richiedendo più passi. Forward è inutile perché colpisce il muro. Pickup, drop e toggle non hanno effetti nello stato corrente. I valori Q sono normalizzati rispetto al valore massimo (left = 1.0).",
+  "q-function-values": {
+    "left": 1.0,
+    "right": 0.6,
+    "forward": 0.3,
+    "pickup": 0.0,
+    "drop": 0.0,
+    "toggle": 0.0
+  }
+}]
